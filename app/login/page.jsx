@@ -17,28 +17,35 @@ export default function Login() {
     setError('');
     setLoading(true);
 
-    const url = `http://apidol.myportal.co.in/api/LoginUser?LoginName=${encodeURIComponent(
-      username
-    )}&Password=${encodeURIComponent(password)}`;
+    const url = `http://apidol.myportal.co.in/api/LoginUser`;
 
     try {
       const res = await fetch(url, {
         method: 'GET',
         headers: {
-          'APIKey': 'Sdt!@#321', // Include your API key here
+           'Content-Type': 'application/json',
+          'APIKey': 'Sdt!@#321',
         },
+        body: JSON.stringify({
+          LoginName: username,
+          Password: password,
+        }),
       });
+
+      if (!res.ok) {
+        throw new Error(`HTTP error! status: ${res.status}`);
+      }
 
       const data = await res.json();
 
-      if (data.length > 0 && data[0].UserCode) {
+      if (Array.isArray(data) && data.length > 0 && data[0].UserCode) {
         localStorage.setItem('user', JSON.stringify(data[0]));
-        router.push('/dashboard'); // Redirect on successful login
+        router.push('/dashboard');
       } else {
         setError('Invalid username or password');
       }
     } catch (err) {
-      console.error(err);
+      console.error('Login error:', err);
       setError('Login failed. Please try again.');
     } finally {
       setLoading(false);
